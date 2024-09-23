@@ -30,7 +30,7 @@ const HomePage = () => {
       } else {
         timer = setTimeout(() => {
           setDisplayedTitle(currentTitle.substring(0, displayedTitle.length - 1));
-        }, 50);
+        }, 35);
       }
     } else {
       if (displayedTitle === currentTitle) {
@@ -38,7 +38,7 @@ const HomePage = () => {
       } else {
         timer = setTimeout(() => {
           setDisplayedTitle(currentTitle.substring(0, displayedTitle.length + 1));
-        }, 100);
+        }, 35);
       }
     }
 
