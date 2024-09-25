@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperclip, faPaperPlane, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
+import { useLocation } from 'react-router-dom';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ShimmerMessage = () => (
   <div className="flex justify-start mb-4 animate-pulse">
@@ -12,6 +14,8 @@ const ShimmerMessage = () => (
 );
 
 const ChatApp = () => {
+  const { state } = useLocation();  // Get the state from location
+  const isFreeChat = state?.isFreeChat || true;  // Default to false if not passed
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -59,20 +63,33 @@ const ChatApp = () => {
       setIsLoading(true);
 
       try {
-        const response = await fetch('https://docai-server.onrender.com/predict', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            "Accept": "application/json",
-          }
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          const botMessage = { text: result.message, isUser: false };
+        if(isFreeChat){
+          // Make sure to include these imports:
+          // import { GoogleGenerativeAI } from "@google/generative-ai";
+          const genAI = new GoogleGenerativeAI(process.env.REACT_APP_API_KEY);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          const prompt = "Act as an AI doctor specifically designed to answer queries related to symptoms and diseases. Your role is to provide clear, accurate, and concise information based on user input about their symptoms.For each query, you will:Analyze the symptoms provided.Offer potential conditions or diseases associated with those symptoms.Suggest next steps, emphasizing the importance of consulting a healthcare professional for diagnosis and treatment.Always stay on topic, responding directly to the user's inquiries without deviation. Maintain an empathetic tone while providing factual information and try to give short answers. Now answer the following question accordingly :";
+          const result = await model.generateContent(prompt+message);
+          const gemResponse = result.response.text();
+          console.log(gemResponse);
+          const botMessage = { text: gemResponse, isUser: false };
           setMessages((prevMessages) => [...prevMessages, botMessage]);
-        } else {
-          console.error('Error sending message:', response.statusText);
+        }
+        else{
+          const response = await fetch('https://docai-server.onrender.com/predict', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              "Accept": "application/json",
+            }
+          });
+          if (response.ok) {
+            const result = await response.json();
+            const botMessage = { text: result.message, isUser: false };
+            setMessages((prevMessages) => [...prevMessages, botMessage]);
+          } else {
+            console.error('Error sending message:', response.statusText);
+          }
         }
       } catch (error) {
         console.error('Error sending message:', error);
@@ -186,8 +203,8 @@ const ChatApp = () => {
 
       <div className="p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center space-x-2">
-          <label className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300">
-            <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
+          {!isFreeChat && <label className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300">
+             <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
             <input
               type="file"
               onChange={handleFileChange}
@@ -195,7 +212,7 @@ const ChatApp = () => {
               accept="image/*"
               ref={fileInputRef}
             />
-          </label>
+          </label>}
           {selectedFile && (
             <div className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 text-xs md:text-sm">
               <span className="text-blue-800 dark:text-blue-200 truncate max-w-[100px] md:max-w-xs">
