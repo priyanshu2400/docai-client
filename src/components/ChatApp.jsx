@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperclip, faPaperPlane, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
+import { faPaperclip, faPaperPlane, faMoon, faSun, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router-dom';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -14,8 +14,8 @@ const ShimmerMessage = () => (
 );
 
 const ChatApp = () => {
-  const { state } = useLocation();  // Get the state from location
-  const isFreeChat = state?.isFreeChat || false;  // Default to false if not passed
+  const { state } = useLocation();
+  const isFreeChat = state?.isFreeChat || false;
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -64,18 +64,15 @@ const ChatApp = () => {
 
       try {
         if(isFreeChat){
-          // Make sure to include these imports:
-          // import { GoogleGenerativeAI } from "@google/generative-ai";
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_API_KEY);
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const prompt = "Act as an AI doctor specifically designed to answer queries related to symptoms and diseases. Your role is to provide clear, accurate, and concise information based on user input about their symptoms.For each query, you will:Analyze the symptoms provided.Offer potential conditions or diseases associated with those symptoms.Suggest next steps, emphasizing the importance of consulting a healthcare professional for diagnosis and treatment.Always stay on topic, responding directly to the user's inquiries without deviation. Maintain an empathetic tone while providing factual information and try to give short answers. Now answer the following question accordingly :";
-          const result = await model.generateContent(prompt+message);
+          const prompt = "Act as an AI doctor specifically designed to answer queries related to symptoms and diseases. Your role is to provide clear, accurate, and concise information based on user input about their symptoms. For each query, you will: Analyze the symptoms provided. Offer potential conditions or diseases associated with those symptoms. Suggest next steps, emphasizing the importance of consulting a healthcare professional for diagnosis and treatment. Always stay on topic, responding directly to the user's inquiries without deviation. Maintain an empathetic tone while providing factual information and try to give short answers. Now answer the following question accordingly:";
+          const result = await model.generateContent(prompt + message);
           const gemResponse = result.response.text();
           console.log(gemResponse);
           const botMessage = { text: gemResponse, isUser: false };
           setMessages((prevMessages) => [...prevMessages, botMessage]);
-        }
-        else{
+        } else {
           const response = await fetch('https://docai-server.onrender.com/predict', {
             method: 'POST',
             body: formData,
@@ -154,6 +151,13 @@ const ChatApp = () => {
     setDarkMode((prevMode) => !prevMode);
   };
 
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <header className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 text-white p-4 md:p-6 shadow-lg flex justify-between items-center">
@@ -202,38 +206,48 @@ const ChatApp = () => {
       </div>
 
       <div className="p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
-        <div className="flex items-center space-x-2">
-          {!isFreeChat && <label className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300">
-             <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="hidden"
-              accept="image/*"
-              ref={fileInputRef}
-            />
-          </label>}
+        <div className="flex flex-wrap items-center space-x-2">
+          {!isFreeChat && (
+            <label className="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 mb-2 sm:mb-0">
+              <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*"
+                ref={fileInputRef}
+              />
+            </label>
+          )}
           {selectedFile && (
-            <div className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 text-xs md:text-sm">
+            <div className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 text-xs md:text-sm mb-2 sm:mb-0">
               <span className="text-blue-800 dark:text-blue-200 truncate max-w-[100px] md:max-w-xs">
                 {selectedFile.name}
               </span>
+              <button
+                onClick={removeSelectedFile}
+                className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
             </div>
           )}
-          <input
-            type="text"
-            className="flex-grow border dark:border-gray-600 rounded-full py-2 px-3 md:px-4 text-sm md:text-base outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition duration-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            placeholder="Type a message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button
-            className="bg-blue-500 dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 flex items-center justify-center w-8 h-8 md:w-10 md:h-10"
-            onClick={handleSendMessage}
-          >
-            <FontAwesomeIcon icon={faPaperPlane} className="text-lg" />
-          </button>
+          <div className="flex-grow flex items-center space-x-2">
+            <input
+              type="text"
+              className="w-full border dark:border-gray-600 rounded-full py-2 px-3 md:px-4 text-sm md:text-base outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition duration-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Type a message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              className="flex-shrink-0 bg-blue-500 dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 flex items-center justify-center w-8 h-8 md:w-10 md:h-10"
+              onClick={handleSendMessage}
+            >
+              <FontAwesomeIcon icon={faPaperPlane} className="text-lg" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
