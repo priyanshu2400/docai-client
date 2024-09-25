@@ -15,7 +15,7 @@ const ShimmerMessage = () => (
 
 const ChatApp = () => {
   const { state } = useLocation();  // Get the state from location
-  const isFreeChat = state?.isFreeChat || true;  // Default to false if not passed
+  const isFreeChat = state?.isFreeChat || false;  // Default to false if not passed
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
