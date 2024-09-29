@@ -35,7 +35,11 @@ const ChatApp = () => {
   };
 
   useEffect(scrollToBottom, [messages]);
-
+  useEffect(() => {
+    const initialMesssage = "Hello! I'm your AI health assistant. Share your symptoms with me, and I'll help you identify potential health concerns and guide you towards the next steps!";
+    const data = { text: initialMesssage, isUser: false };
+    setMessages((prevMessages) => [...prevMessages, data]);
+  }, []);
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
