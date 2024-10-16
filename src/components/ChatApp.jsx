@@ -13,6 +13,15 @@ const ShimmerMessage = () => (
   </div>
 );
 
+const formatGeminiResponse = (response) => {
+  return response
+    .replace(/\* \*\*(.*?)\*\*:/g, '<li><b>$1:</b></li>')  // Format list items and bold text
+    .replace(/\* \*\*(.*?)\*\*/g, '<b>$1</b>')  // Format remaining bold text
+    .replace(/\*/g, '')  // Remove any remaining asterisks
+    .replace(/(?:\r\n|\r|\n)/g, '<br>');  // Replace line breaks with <br>
+};
+
+
 const ChatApp = () => {
   const { state } = useLocation();
   const isFreeChat = state?.isFreeChat || false;
@@ -57,27 +66,31 @@ const ChatApp = () => {
         isUser: true
       };
       setMessages((prevMessages) => [...prevMessages, userMessage]);
-
+  
       const formData = new FormData();
       formData.append('message', message);
       if (selectedFile) formData.append('file', selectedFile);
-
+  
       setMessage('');
       setSelectedFile(null);
       setIsLoading(true);
-
+  
       try {
-        if(isFreeChat){
+        if (isFreeChat) {
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_API_KEY);
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const prompt = "Act as an AI doctor specifically designed to answer queries related to symptoms and diseases. Your role is to provide clear, accurate, and concise information based on user input about their symptoms. For each query, you will: Analyze the symptoms provided. Offer potential conditions or diseases associated with those symptoms. Suggest next steps, emphasizing the importance of consulting a healthcare professional for diagnosis and treatment. Always stay on topic, responding directly to the user's inquiries without deviation. Maintain an empathetic tone while providing factual information and try to give short answers. Now answer the following question accordingly:";
+          const prompt = "Act as an AI doctor ...";  // Truncated for brevity
           const result = await model.generateContent(prompt + message);
           const gemResponse = result.response.text();
-          console.log(gemResponse);
-          const botMessage = { text: gemResponse, isUser: false };
+  
+          // Apply formatting to the Gemini response before displaying
+          const formattedResponse = formatGeminiResponse(gemResponse);
+  
+          const botMessage = { text: formattedResponse, isUser: false };
           setMessages((prevMessages) => [...prevMessages, botMessage]);
+  
         } else {
-          const response = await fetch('https://docai-server.onrender.com/predict', {
+          const response = await fetch('http://127.0.0.1:8000/predict', {
             method: 'POST',
             body: formData,
             headers: {
@@ -86,7 +99,8 @@ const ChatApp = () => {
           });
           if (response.ok) {
             const result = await response.json();
-            const botMessage = { text: result.message, isUser: false };
+            const formattedResponse = formatGeminiResponse(result.message);
+            const botMessage = { text: formattedResponse, isUser: false };
             setMessages((prevMessages) => [...prevMessages, botMessage]);
           } else {
             console.error('Error sending message:', response.statusText);
@@ -99,6 +113,7 @@ const ChatApp = () => {
       }
     }
   };
+  
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -192,7 +207,11 @@ const ChatApp = () => {
                 }
                 transition-all duration-300 ease-in-out transform hover:scale-105`}
             >
-              {msg.text && <p className="break-words text-sm md:text-base">{msg.text}</p>}
+              {msg.text && msg.isUser ? (
+                <p className="break-words text-sm md:text-base">{msg.text}</p>
+              ) : (
+                <div dangerouslySetInnerHTML={{ __html: msg.text }} className="break-words text-sm md:text-base" />
+              )}
               {msg.fileUrl && (
                 <div className="mt-2">
                   <img
