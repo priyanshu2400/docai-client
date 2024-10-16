@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperclip, faPaperPlane, faMoon, faSun, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ShimmerMessage = () => (
@@ -29,6 +29,7 @@ const ChatApp = () => {
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true' ||
@@ -181,7 +182,7 @@ const ChatApp = () => {
     <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <header className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 text-white p-4 md:p-6 shadow-lg flex justify-between items-center">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold">Doctor Chat Bot</h1>
+          <h1 className="text-xl md:text-3xl font-bold hover:cursor-pointer" onClick={() => {navigate("/")}}>Doctor Chat Bot</h1>
           <p className="text-xs md:text-base mt-1">Your virtual health assistant</p>
         </div>
         <button
