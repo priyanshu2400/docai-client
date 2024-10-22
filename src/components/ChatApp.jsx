@@ -229,7 +229,7 @@ const ChatApp = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
+      <div className="fixed bottom-0 left-0 right-0 p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="flex flex-wrap items-center space-x-2">
           {!isFreeChat && (
             <label className="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 mb-2 sm:mb-0">
