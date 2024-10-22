@@ -178,104 +178,109 @@ const ChatApp = () => {
     }
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <header className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 text-white p-4 md:p-6 shadow-lg flex justify-between items-center">
-        <div>
-          <h1 className="text-xl md:text-3xl font-bold hover:cursor-pointer" onClick={() => {navigate("/")}}>Doctor Chat Bot</h1>
-          <p className="text-xs md:text-base mt-1">Your virtual health assistant</p>
-        </div>
-        <button
-          onClick={toggleDarkMode}
-          className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition duration-300"
-          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          <FontAwesomeIcon icon={darkMode ? faSun : faMoon} className="text-lg" />
-        </button>
-      </header>
-
-      <div className="flex-grow p-4 md:p-6 overflow-y-auto">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`mb-4 flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`p-3 md:p-4 rounded-lg shadow-md max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 
-                ${msg.isUser
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white dark:from-blue-700 dark:to-blue-800'
-                  : 'bg-white text-gray-800 dark:bg-gray-800 dark:text-white'
-                }
-                transition-all duration-300 ease-in-out transform hover:scale-105`}
-            >
-              {msg.text && msg.isUser ? (
-                <p className="break-words text-sm md:text-base">{msg.text}</p>
-              ) : (
-                <div dangerouslySetInnerHTML={{ __html: msg.text }} className="break-words text-sm md:text-base" />
-              )}
-              {msg.fileUrl && (
-                <div className="mt-2">
-                  <img
-                    src={msg.fileUrl}
-                    alt="Attachment"
-                    className="w-full h-auto object-cover rounded-md max-w-xs max-h-60"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        {isLoading && <ShimmerMessage />}
-        <div ref={messagesEndRef} />
+ return (
+  <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    
+    {/* Fixed Header */}
+    <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 text-white p-4 md:p-6 shadow-lg flex justify-between items-center z-10">
+      <div>
+        <h1 className="text-xl md:text-3xl font-bold hover:cursor-pointer" onClick={() => {navigate("/")}}>Doctor Chat Bot</h1>
+        <p className="text-xs md:text-base mt-1">Your virtual health assistant</p>
       </div>
+      <button
+        onClick={toggleDarkMode}
+        className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition duration-300"
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        <FontAwesomeIcon icon={darkMode ? faSun : faMoon} className="text-lg" />
+      </button>
+    </header>
 
-      <div className="fixed bottom-0 left-0 right-0 p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
-        <div className="flex flex-wrap items-center space-x-2">
-          {!isFreeChat && (
-            <label className="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 mb-2 sm:mb-0">
-              <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*"
-                ref={fileInputRef}
-              />
-            </label>
-          )}
-          {selectedFile && (
-            <div className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 text-xs md:text-sm mb-2 sm:mb-0">
-              <span className="text-blue-800 dark:text-blue-200 truncate max-w-[100px] md:max-w-xs">
-                {selectedFile.name}
-              </span>
-              <button
-                onClick={removeSelectedFile}
-                className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
-          )}
-          <div className="flex-grow flex items-center space-x-2">
+    {/* Scrollable Chat Area */}
+    <div className="flex-grow p-4 md:p-6 overflow-y-auto mt-20 md:mt-24 mb-10 md:mb-20"> {/* Adjust mt-20 for header space */}
+      {messages.map((msg, index) => (
+        <div
+          key={index}
+          className={`mb-4 flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+        >
+          <div
+            className={`p-3 md:p-4 rounded-lg shadow-md max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 
+              ${msg.isUser
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white dark:from-blue-700 dark:to-blue-800'
+                : 'bg-white text-gray-800 dark:bg-gray-800 dark:text-white'
+              }
+              transition-all duration-300 ease-in-out transform hover:scale-105`}
+          >
+            {msg.text && msg.isUser ? (
+              <p className="break-words text-sm md:text-base">{msg.text}</p>
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: msg.text }} className="break-words text-sm md:text-base" />
+            )}
+            {msg.fileUrl && (
+              <div className="mt-2">
+                <img
+                  src={msg.fileUrl}
+                  alt="Attachment"
+                  className="w-full h-auto object-cover rounded-md max-w-xs max-h-60"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+      {isLoading && <ShimmerMessage />}
+      <div ref={messagesEndRef} />
+    </div>
+
+    {/* Fixed Input Section */}
+    <div className="fixed bottom-0 left-0 right-0 p-3 md:p-4 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300 z-10">
+      <div className="flex flex-wrap items-center space-x-2">
+        {!isFreeChat && (
+          <label className="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gray-200 dark:bg-gray-700 rounded-full cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300 mb-2 sm:mb-0">
+            <FontAwesomeIcon icon={faPaperclip} className="text-gray-600 dark:text-gray-300 text-lg" />
             <input
-              type="text"
-              className="w-full border dark:border-gray-600 rounded-full py-2 px-3 md:px-4 text-sm md:text-base outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition duration-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Type a message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
+              type="file"
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*"
+              ref={fileInputRef}
             />
+          </label>
+        )}
+        {selectedFile && (
+          <div className="flex items-center bg-blue-100 dark:bg-blue-900 rounded-full px-2 py-1 text-xs md:text-sm mb-2 sm:mb-0">
+            <span className="text-blue-800 dark:text-blue-200 truncate max-w-[100px] md:max-w-xs">
+              {selectedFile.name}
+            </span>
             <button
-              className="flex-shrink-0 bg-blue-500 dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 flex items-center justify-center w-8 h-8 md:w-10 md:h-10"
-              onClick={handleSendMessage}
+              onClick={removeSelectedFile}
+              className="ml-2 text-blue-800 dark:text-blue-200 hover:text-blue-600 dark:hover:text-blue-400"
             >
-              <FontAwesomeIcon icon={faPaperPlane} className="text-lg" />
+              <FontAwesomeIcon icon={faTimes} />
             </button>
           </div>
+        )}
+        <div className="flex-grow flex items-center space-x-2">
+          <input
+            type="text"
+            className="w-full border dark:border-gray-600 rounded-full py-2 px-3 md:px-4 text-sm md:text-base outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition duration-300 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            placeholder="Type a message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <button
+            className="flex-shrink-0 bg-blue-500 dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 flex items-center justify-center w-8 h-8 md:w-10 md:h-10"
+            onClick={handleSendMessage}
+          >
+            <FontAwesomeIcon icon={faPaperPlane} className="text-lg" />
+          </button>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default ChatApp;
