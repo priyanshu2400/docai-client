@@ -80,7 +80,10 @@ const ChatApp = () => {
         if (isFreeChat) {
           const genAI = new GoogleGenerativeAI(process.env.REACT_APP_API_KEY);
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const prompt = "Act as an AI doctor ...";  // Truncated for brevity
+          const prompt = `You are an AI health assistant. Answer general health-related questions clearly and accurately. Provide helpful advice or precautions, but avoid giving definitive diagnoses or treatments. Always encourage consulting a healthcare professional for serious concerns.
+                        Example:
+                        User: "How can I reduce a fever at home?"
+                        AI: "To reduce a fever, stay hydrated, rest, and use a cold compress on your forehead. If the fever persists or is very high, consult a doctor."`
           const result = await model.generateContent(prompt + message);
           const gemResponse = result.response.text();
   
